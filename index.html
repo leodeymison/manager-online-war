@@ -197,6 +197,7 @@ button,input,select{font:inherit;color:inherit}
   box-shadow:inset 0 0 0 1px var(--edge), inset 0 -4px 8px -4px rgba(0,0,0,.45), 0 3px 8px -3px rgba(0,0,0,.55);
 }
 .die--att{--face:#AE3A24;--pips:#F4E9DC;--edge:rgba(0,0,0,.35)}
+.die--def{--face:#28596E;--pips:#FFFFFF;--edge:rgba(0,0,0,.35)}
 .die .pip{align-self:center;justify-self:center;width:11px;height:11px;border-radius:50%;background:var(--pips);opacity:0}
 .die[data-v="1"] .pip:nth-child(5),
 .die[data-v="2"] .pip:nth-child(1),.die[data-v="2"] .pip:nth-child(9),
@@ -212,7 +213,21 @@ button,input,select{font:inherit;color:inherit}
   color:var(--ink-3);height:12px;
 }
 
-/* muitos contra muitos: dados encolhem conforme a quantidade */
+/* muitos contra muitos: uma linha de dados por rodada, em escala menor */
+.dice--rodadas{flex-direction:column;flex-wrap:nowrap;justify-content:flex-start;align-items:center}
+.rodada{display:flex;align-items:center;gap:inherit}
+.dice--md .rodada{gap:7px}
+.dice--sm .rodada{gap:5px}
+.rodada-n{
+  font-family:var(--font-cond);font-size:11px;font-weight:600;color:var(--ink-3);
+  min-width:16px;text-align:right;font-variant-numeric:tabular-nums;
+}
+.pairs .pair-rod{
+  display:flex;justify-content:space-between;align-items:baseline;gap:10px;
+  background:none;padding:9px 2px 1px;font-size:11.5px;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--ink-3);
+}
+
 .dice--md{gap:7px}
 .dice--md .die{width:38px;height:38px;border-radius:6px;padding:5px;gap:1px}
 .dice--md .die .pip{width:7px;height:7px}
@@ -634,7 +649,7 @@ footer b{color:var(--ink-2);font-weight:500}
           <ul class="history" id="history" style="margin-top:8px"></ul>
         </div>
 
-        <p class="note">Empate favorece a defesa · 1, 2, 3, 10 ou 50 dados de cada lado</p>
+        <p class="note">Empate favorece a defesa · M5 e M10 rolam 3 dados por 5 ou 10 rodadas</p>
       </div>
     </section>
   </main>
@@ -813,9 +828,18 @@ footer b{color:var(--ink-2);font-weight:500}
   }
   function dado(){ return rnd(6) + 1; }
 
-  /* quantidades de dados por lado; 10 e 50 para muitos contra muitos */
-  var OPCOES_DADOS = [1, 2, 3, 10, 50];
-  function qtdValida(n){ return OPCOES_DADOS.indexOf(n) >= 0 ? n : 3; }
+  /* opcoes de cada lado; M5 e M10 repetem os 3 dados por varias rodadas */
+  var OPCOES_DADOS = [
+    {id: 1,     rotulo: '1',   dados: 1, rodadas: 1,  titulo: '1 dado'},
+    {id: 2,     rotulo: '2',   dados: 2, rodadas: 1,  titulo: '2 dados'},
+    {id: 3,     rotulo: '3',   dados: 3, rodadas: 1,  titulo: '3 dados'},
+    {id: 'M5',  rotulo: 'M5',  dados: 3, rodadas: 5,  titulo: '3 dados em 5 rodadas'},
+    {id: 'M10', rotulo: 'M10', dados: 3, rodadas: 10, titulo: '3 dados em 10 rodadas'}
+  ];
+  function opcaoDados(id){
+    for(var i = 0; i < OPCOES_DADOS.length; i++){ if(OPCOES_DADOS[i].id === id) return OPCOES_DADOS[i]; }
+    return OPCOES_DADOS[2];
+  }
 
   /* ---------------- estado ---------------- */
   var CHAVE = 'mesa-de-guerra-v1';
@@ -848,8 +872,9 @@ footer b{color:var(--ink-2);font-weight:500}
       proximoId = d.proximoId || (d.estado.jogadores.length + 1);
       var e = d.estado;
       e.dados = e.dados || {ataque:3, defesa:3, ultimo:null, historico:[]};
-      e.dados.ataque = qtdValida(e.dados.ataque);
-      e.dados.defesa = qtdValida(e.dados.defesa);
+      e.dados.ataque = opcaoDados(e.dados.ataque).id;
+      e.dados.defesa = opcaoDados(e.dados.defesa).id;
+      if(e.dados.ultimo && !e.dados.ultimo.rodadas) e.dados.ultimo = null;
       e.dados.historico = e.dados.historico || [];
       e.trocas = e.trocas || {historico:[], bonus:0, quem:null};
       e.trocas.historico = e.trocas.historico || [];
@@ -1494,15 +1519,15 @@ footer b{color:var(--ink-2);font-weight:500}
     [['count-att','ataque'],['count-def','defesa']].forEach(function(par){
       var el = document.getElementById(par[0]), lado = par[1];
       el.innerHTML = '';
-      OPCOES_DADOS.forEach(function(n){
+      OPCOES_DADOS.forEach(function(op){
         var b = document.createElement('button');
         b.type = 'button';
-        b.textContent = n;
-        b.title = n + (n > 1 ? ' dados' : ' dado');
-        b.setAttribute('aria-pressed', String(estado.dados[lado] === n));
+        b.textContent = op.rotulo;
+        b.title = op.titulo;
+        b.setAttribute('aria-pressed', String(estado.dados[lado] === op.id));
         b.addEventListener('click', function(){
           if(rolando) return;
-          estado.dados[lado] = n;
+          estado.dados[lado] = op.id;
           estado.dados.ultimo = null;
           salvar(); renderDados();
         });
@@ -1527,24 +1552,41 @@ footer b{color:var(--ink-2);font-weight:500}
     return wrap;
   }
 
+  function totalRodadas(){
+    return Math.max(opcaoDados(estado.dados.ataque).rodadas, opcaoDados(estado.dados.defesa).rodadas);
+  }
+
   function renderDados(){
     renderContadores();
     var u = estado.dados.ultimo;
-    var maior = Math.max(estado.dados.ataque, estado.dados.defesa);
-    var escala = maior > 12 ? ' dice--sm' : (maior > 3 ? ' dice--md' : '');
+    var nRod = totalRodadas();
+    var escala = nRod > 5 ? ' dice--sm' : (nRod > 1 ? ' dice--md' : '');
     [['ataque', elDiceAtt], ['defesa', elDiceDef]].forEach(function(par){
       var lado = par[0], el = par[1];
+      var opt = opcaoDados(estado.dados[lado]);
       el.innerHTML = '';
-      el.className = 'dice' + escala;
-      var qtd = estado.dados[lado];
-      var valores = u ? u[lado] : null;
-      var pares = u ? Math.min(u.ataque.length, u.defesa.length) : 0;
-      for(var i = 0; i < qtd; i++){
-        var v = valores ? valores[i] : null;
-        var usado = valores ? (i < pares) : null;
-        var marca = '';
-        if(u && i < pares) marca = (u.pares[i].vencedor === lado) ? 'vence' : '';
-        el.appendChild(criarDado(v, lado, usado, marca));
+      el.className = 'dice' + escala + (nRod > 1 ? ' dice--rodadas' : '');
+      for(var r = 0; r < nRod; r++){
+        var rd = u && u.rodadas[r];
+        var linha = el;
+        if(nRod > 1){
+          linha = document.createElement('div');
+          linha.className = 'rodada';
+          var num = document.createElement('span');
+          num.className = 'rodada-n';
+          num.textContent = r + 1;
+          linha.appendChild(num);
+        }
+        var valores = rd ? rd[lado] : null;
+        var pares = rd ? rd.pares.length : 0;
+        for(var i = 0; i < opt.dados; i++){
+          var v = valores ? valores[i] : null;
+          var usado = valores ? (i < pares) : null;
+          var marca = '';
+          if(rd && i < pares) marca = (rd.pares[i].vencedor === lado) ? 'vence' : '';
+          linha.appendChild(criarDado(v, lado, usado, marca));
+        }
+        if(nRod > 1) el.appendChild(linha);
       }
     });
     renderVeredito();
@@ -1576,24 +1618,36 @@ footer b{color:var(--ink-2);font-weight:500}
     });
     box.appendChild(perdas);
 
+    var varias = u.rodadas.length > 1;
+    var linhas = 0;
+    u.rodadas.forEach(function(rd){ linhas += rd.pares.length + (varias ? 1 : 0); });
+
     var ol = document.createElement('ul');
-    ol.className = 'pairs' + (u.pares.length > 8 ? ' pairs--longa' : '');
-    u.pares.forEach(function(par, i){
-      var li = document.createElement('li');
-      var a = document.createElement('span'); a.className = 'v v--att'; a.textContent = par.ataque;
-      var w = document.createElement('span'); w.className = 'who';
-      w.innerHTML = 'Dado ' + (i + 1) + ' &middot; <b>' + (par.vencedor === 'ataque' ? 'ataque' : 'defesa') + '</b>' + (par.ataque === par.defesa ? ' (empate)' : '');
-      var d = document.createElement('span'); d.className = 'v v--def'; d.textContent = par.defesa;
-      li.appendChild(a); li.appendChild(w); li.appendChild(d);
-      ol.appendChild(li);
+    ol.className = 'pairs' + (linhas > 8 ? ' pairs--longa' : '');
+    u.rodadas.forEach(function(rd, ri){
+      if(varias){
+        var cab = document.createElement('li');
+        cab.className = 'pair-rod';
+        var nome = document.createElement('span'); nome.textContent = 'Rodada ' + (ri + 1);
+        var saldo = document.createElement('span');
+        saldo.textContent = '−' + rd.perdasAtaque + ' ataque · −' + rd.perdasDefesa + ' defesa';
+        cab.appendChild(nome); cab.appendChild(saldo);
+        ol.appendChild(cab);
+      }
+      rd.pares.forEach(function(par, i){
+        var li = document.createElement('li');
+        var a = document.createElement('span'); a.className = 'v v--att'; a.textContent = par.ataque;
+        var w = document.createElement('span'); w.className = 'who';
+        w.innerHTML = 'Dado ' + (i + 1) + ' &middot; <b>' + (par.vencedor === 'ataque' ? 'ataque' : 'defesa') + '</b>' + (par.ataque === par.defesa ? ' (empate)' : '');
+        var d = document.createElement('span'); d.className = 'v v--def'; d.textContent = par.defesa;
+        li.appendChild(a); li.appendChild(w); li.appendChild(d);
+        ol.appendChild(li);
+      });
     });
     box.appendChild(ol);
     elVerdict.appendChild(box);
   }
 
-  function resumoValores(v){
-    return v.length > 8 ? v.slice(0, 8).join(' ') + ' … (' + v.length + ')' : v.join(' ');
-  }
 
   function renderHistorico(){
     var h = estado.dados.historico;
@@ -1603,7 +1657,11 @@ footer b{color:var(--ink-2);font-weight:500}
       var li = document.createElement('li');
       var d = document.createElement('span');
       d.className = 'h-dice';
-      d.innerHTML = '<b>' + resumoValores(r.ataque) + '</b><i>contra</i><b>' + resumoValores(r.defesa) + '</b>';
+      var mostraFaces = r.rodadas === 1 && r.ataque && r.defesa;
+      var textoA = mostraFaces ? r.ataque.join(' ') : r.rotuloAtaque;
+      var textoD = mostraFaces ? r.defesa.join(' ') : r.rotuloDefesa;
+      var meio = mostraFaces ? 'contra' : 'contra &middot; ' + r.rodadas + ' rodadas';
+      d.innerHTML = '<b>' + textoA + '</b><i>' + meio + '</i><b>' + textoD + '</b>';
       var res = document.createElement('span');
       res.className = 'h-res';
       res.textContent = '−' + r.perdasAtaque + ' ataque · −' + r.perdasDefesa + ' defesa';
@@ -1612,7 +1670,7 @@ footer b{color:var(--ink-2);font-weight:500}
     });
   }
 
-  function resolver(ataque, defesa){
+  function resolverRodada(ataque, defesa){
     var a = ataque.slice().sort(function(x, y){ return y - x; });
     var d = defesa.slice().sort(function(x, y){ return y - x; });
     var n = Math.min(a.length, d.length), pares = [], pa = 0, pd = 0;
@@ -1624,21 +1682,34 @@ footer b{color:var(--ink-2);font-weight:500}
     return {ataque: a, defesa: d, pares: pares, perdasAtaque: pa, perdasDefesa: pd};
   }
 
+  function resolverBatalha(optA, optD){
+    var n = Math.max(optA.rodadas, optD.rodadas), rodadas = [], pa = 0, pd = 0;
+    for(var i = 0; i < n; i++){
+      var r = resolverRodada(
+        Array.apply(null, Array(optA.dados)).map(dado),
+        Array.apply(null, Array(optD.dados)).map(dado)
+      );
+      pa += r.perdasAtaque; pd += r.perdasDefesa;
+      rodadas.push(r);
+    }
+    return {rodadas: rodadas, perdasAtaque: pa, perdasDefesa: pd};
+  }
+
   function rolar(){
     if(rolando) return;
     rolando = true;
     elRoll.disabled = true;
 
-    var res = resolver(
-      Array.apply(null, Array(estado.dados.ataque)).map(dado),
-      Array.apply(null, Array(estado.dados.defesa)).map(dado)
-    );
+    var optA = opcaoDados(estado.dados.ataque), optD = opcaoDados(estado.dados.defesa);
+    var res = resolverBatalha(optA, optD);
 
     var reduz = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     function concluir(){
       estado.dados.ultimo = res;
       estado.dados.historico = [{
-        ataque: res.ataque, defesa: res.defesa,
+        rodadas: res.rodadas.length,
+        rotuloAtaque: optA.rotulo, rotuloDefesa: optD.rotulo,
+        ataque: res.rodadas[0].ataque, defesa: res.rodadas[0].defesa,
         perdasAtaque: res.perdasAtaque, perdasDefesa: res.perdasDefesa
       }].concat(estado.dados.historico).slice(0, 8);
       rolando = false;
