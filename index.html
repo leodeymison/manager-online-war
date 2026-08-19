@@ -1,0 +1,1274 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mesa de Guerra</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Karla:wght@400;500;700&family=Saira+Condensed:wght@400;500;600;700&display=swap">
+<style>
+/* ---------- tokens: claro = mapa em papel ---------- */
+:root{
+  --ground:#E7E4DA;
+  --surface:#F3F1E9;
+  --surface-2:#DCD8CB;
+  --line:#C3BEAE;
+  --line-soft:#D5D0C2;
+  --ink:#182225;
+  --ink-2:#4F5B5D;
+  --ink-3:#7D8788;
+  --red:#A93823;
+  --red-soft:#C9503A;
+  --steel:#28596E;
+  --brass:#836218;
+  --focus:#28596E;
+  --oceano:#CFD9D8;
+  --oceano-claro:#DCE4E2;
+  --grid:rgba(24,34,37,.10);
+  --terra:#B9B2A0;
+  --shadow:0 1px 0 rgba(24,34,37,.06), 0 8px 24px -14px rgba(24,34,37,.5);
+  --font-display:'Cinzel', Georgia, 'Times New Roman', serif;
+  --font-cond:'Saira Condensed', 'Arial Narrow', Helvetica, sans-serif;
+  --font-body:'Karla', system-ui, -apple-system, Segoe UI, sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --ground:#0A1417;
+    --surface:#122024;
+    --surface-2:#1A2D33;
+    --line:#294046;
+    --line-soft:#1F343A;
+    --ink:#E3EBE9;
+    --ink-2:#9AAEB0;
+    --ink-3:#6B7F82;
+    --red:#E2664A;
+    --red-soft:#B94A33;
+    --steel:#71B2CA;
+    --brass:#D6AC43;
+    --focus:#71B2CA;
+    --oceano:#08161A;
+    --oceano-claro:#0D2026;
+    --grid:rgba(155,205,212,.07);
+    --terra:#24383E;
+    --shadow:0 1px 0 rgba(0,0,0,.4), 0 10px 30px -16px rgba(0,0,0,.9);
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#0A1417;
+  --surface:#122024;
+  --surface-2:#1A2D33;
+  --line:#294046;
+  --line-soft:#1F343A;
+  --ink:#E3EBE9;
+  --ink-2:#9AAEB0;
+  --ink-3:#6B7F82;
+  --red:#E2664A;
+  --red-soft:#B94A33;
+  --steel:#71B2CA;
+  --brass:#D6AC43;
+  --focus:#71B2CA;
+  --oceano:#08161A;
+  --oceano-claro:#0D2026;
+  --grid:rgba(155,205,212,.07);
+  --terra:#24383E;
+  --shadow:0 1px 0 rgba(0,0,0,.4), 0 10px 30px -16px rgba(0,0,0,.9);
+}
+
+/* ---------- base ---------- */
+*,*::before,*::after{box-sizing:border-box}
+[hidden]{display:none !important}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0;
+  background:var(--ground);
+  color:var(--ink);
+  font-family:var(--font-body);
+  font-size:15px;
+  line-height:1.5;
+  -webkit-font-smoothing:antialiased;
+}
+h1,h2,h3{margin:0;text-wrap:balance}
+button,input,select{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--focus);outline-offset:2px;border-radius:3px}
+
+.app{max-width:1140px;margin:0 auto;padding:0 20px 72px}
+
+/* ---------- barra superior ---------- */
+.topbar{
+  display:flex;flex-wrap:wrap;gap:18px 24px;align-items:flex-end;justify-content:space-between;
+  padding:26px 0 18px;border-bottom:1px solid var(--line);margin-bottom:28px;
+}
+.brand{display:flex;align-items:center;gap:12px}
+.rose{width:34px;height:34px;color:var(--brass);flex:none}
+.brand h1{
+  font-family:var(--font-display);font-weight:700;font-size:26px;line-height:1;
+  letter-spacing:.02em;
+}
+.brand p{
+  margin:5px 0 0;font-family:var(--font-cond);font-size:12px;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--ink-3);
+}
+.switch{display:flex;gap:2px;padding:3px;background:var(--surface-2);border:1px solid var(--line);border-radius:2px}
+.switch button{
+  font-family:var(--font-cond);font-size:14px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;
+  padding:8px 16px;background:none;border:0;color:var(--ink-2);cursor:pointer;border-radius:1px;
+}
+.switch button[aria-selected="true"]{background:var(--surface);color:var(--ink);box-shadow:var(--shadow)}
+.switch button:hover{color:var(--ink)}
+
+/* ---------- blocos ---------- */
+.panel{
+  background:var(--surface);border:1px solid var(--line);border-radius:2px;
+  padding:22px;box-shadow:var(--shadow);
+}
+.eyebrow{
+  font-family:var(--font-cond);font-size:12px;font-weight:600;letter-spacing:.18em;
+  text-transform:uppercase;color:var(--ink-3);margin:0 0 4px;
+}
+.panel h2{font-family:var(--font-cond);font-weight:600;font-size:21px;letter-spacing:.03em}
+.hint{margin:6px 0 0;color:var(--ink-2);font-size:13.5px;max-width:62ch}
+
+.btn{
+  font-family:var(--font-cond);font-size:14px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;
+  padding:10px 18px;border:1px solid var(--line);background:var(--surface-2);color:var(--ink);
+  border-radius:2px;cursor:pointer;transition:background .15s,border-color .15s,color .15s;
+}
+.btn:hover{border-color:var(--ink-3)}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.btn--primary{background:var(--red);border-color:var(--red);color:#F7F2EA}
+.btn--primary:hover{background:var(--red-soft);border-color:var(--red-soft)}
+.btn--danger{color:var(--red);border-color:var(--line)}
+.btn--danger:hover{border-color:var(--red)}
+.btn--ghost{background:none}
+
+/* ---------- vista: dados ---------- */
+.dice-stage{display:grid;gap:20px;max-width:760px;margin:0 auto}
+.arena{
+  display:grid;grid-template-columns:1fr auto 1fr;align-items:stretch;gap:0;
+  background:var(--surface);border:1px solid var(--line);border-radius:2px;box-shadow:var(--shadow);
+  overflow:hidden;
+}
+.side{padding:20px 18px 24px;display:flex;flex-direction:column;gap:16px;min-width:0}
+.side-head{display:flex;flex-direction:column;gap:10px;align-items:center}
+.side-label{
+  font-family:var(--font-cond);font-size:14px;font-weight:700;letter-spacing:.22em;text-transform:uppercase;
+}
+.side--att .side-label{color:var(--red)}
+.side--def .side-label{color:var(--steel)}
+.count{display:flex;gap:2px;padding:3px;background:var(--surface-2);border:1px solid var(--line);border-radius:2px}
+.count button{
+  width:34px;height:30px;background:none;border:0;cursor:pointer;border-radius:1px;
+  font-family:var(--font-cond);font-size:16px;font-weight:600;color:var(--ink-2);
+}
+.count button[aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:var(--shadow)}
+.dice{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;align-items:center;min-height:76px;flex:1}
+.versus{
+  display:grid;place-items:center;width:44px;background:var(--surface-2);
+  border-left:1px solid var(--line-soft);border-right:1px solid var(--line-soft);
+  font-family:var(--font-cond);font-size:12px;font-weight:600;letter-spacing:.2em;
+  text-transform:uppercase;color:var(--ink-3);writing-mode:vertical-rl;
+}
+
+/* dados: objetos físicos, mesma cor nos dois temas */
+.die{
+  --face:#F0EADC;--pips:#20272A;--edge:rgba(20,26,28,.28);
+  width:62px;height:62px;border-radius:9px;background:var(--face);
+  display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);
+  padding:9px;gap:2px;
+  box-shadow:inset 0 0 0 1px var(--edge), inset 0 -4px 8px -4px rgba(0,0,0,.45), 0 3px 8px -3px rgba(0,0,0,.55);
+}
+.die--att{--face:#AE3A24;--pips:#F4E9DC;--edge:rgba(0,0,0,.35)}
+.die .pip{align-self:center;justify-self:center;width:11px;height:11px;border-radius:50%;background:var(--pips);opacity:0}
+.die[data-v="1"] .pip:nth-child(5),
+.die[data-v="2"] .pip:nth-child(1),.die[data-v="2"] .pip:nth-child(9),
+.die[data-v="3"] .pip:nth-child(1),.die[data-v="3"] .pip:nth-child(5),.die[data-v="3"] .pip:nth-child(9),
+.die[data-v="4"] .pip:nth-child(1),.die[data-v="4"] .pip:nth-child(3),.die[data-v="4"] .pip:nth-child(7),.die[data-v="4"] .pip:nth-child(9),
+.die[data-v="5"] .pip:nth-child(1),.die[data-v="5"] .pip:nth-child(3),.die[data-v="5"] .pip:nth-child(5),.die[data-v="5"] .pip:nth-child(7),.die[data-v="5"] .pip:nth-child(9),
+.die[data-v="6"] .pip:nth-child(1),.die[data-v="6"] .pip:nth-child(3),.die[data-v="6"] .pip:nth-child(4),.die[data-v="6"] .pip:nth-child(6),.die[data-v="6"] .pip:nth-child(7),.die[data-v="6"] .pip:nth-child(9){opacity:1}
+.die--idle{opacity:.32}
+.die--unused{opacity:.4}
+.die-wrap{display:flex;flex-direction:column;align-items:center;gap:6px}
+.die-tag{
+  font-family:var(--font-cond);font-size:10px;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--ink-3);height:12px;
+}
+@keyframes tumble{
+  0%{transform:translateY(0) rotate(0)}
+  25%{transform:translateY(-14px) rotate(-13deg)}
+  50%{transform:translateY(2px) rotate(9deg)}
+  75%{transform:translateY(-7px) rotate(-5deg)}
+  100%{transform:translateY(0) rotate(0)}
+}
+.die--rolling{animation:tumble .28s ease-in-out infinite}
+
+.roll{
+  font-family:var(--font-cond);font-size:19px;font-weight:700;letter-spacing:.22em;text-transform:uppercase;
+  padding:18px;width:100%;border:1px solid var(--red);border-radius:2px;
+  background:var(--red);color:#F7F2EA;cursor:pointer;box-shadow:var(--shadow);
+  transition:background .15s,transform .08s;
+}
+.roll:hover{background:var(--red-soft)}
+.roll:active{transform:translateY(1px)}
+.roll:disabled{opacity:.6;cursor:wait}
+.roll small{display:block;font-size:11px;font-weight:500;letter-spacing:.16em;opacity:.75;margin-top:4px}
+
+.verdict{
+  background:var(--surface);border:1px solid var(--line);border-radius:2px;box-shadow:var(--shadow);
+  padding:18px 20px;display:grid;gap:16px;
+}
+.verdict--empty{color:var(--ink-3);text-align:center;font-size:13.5px;padding:22px}
+.losses{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.loss{padding:12px 14px;border-radius:2px;border:1px solid var(--line);background:var(--surface-2);display:grid;gap:3px}
+.loss--att{border-left:3px solid var(--red)}
+.loss--def{border-left:3px solid var(--steel)}
+.loss .lbl{font-family:var(--font-cond);font-size:12px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-3)}
+.loss .val{display:flex;align-items:baseline;gap:7px}
+.loss b{font-family:var(--font-cond);font-size:32px;font-weight:700;line-height:1;font-variant-numeric:tabular-nums}
+.loss--att b{color:var(--red)}
+.loss--def b{color:var(--steel)}
+.loss .un{font-family:var(--font-cond);font-size:14px;letter-spacing:.08em;color:var(--ink-2)}
+.pairs{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+.pairs li{
+  display:grid;grid-template-columns:44px 1fr 44px;align-items:center;gap:12px;
+  padding:8px 12px;background:var(--surface-2);border-radius:2px;
+  font-family:var(--font-cond);font-variant-numeric:tabular-nums;
+}
+.pairs .v{font-size:20px;font-weight:700;text-align:center}
+.pairs .v--att{color:var(--red)}
+.pairs .v--def{color:var(--steel)}
+.pairs .who{
+  text-align:center;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3);
+}
+.pairs .who b{font-weight:600;color:var(--ink-2)}
+
+.history{margin:0;padding:0;list-style:none;display:grid;gap:4px}
+.history li{
+  display:flex;flex-wrap:wrap;gap:10px;align-items:center;padding:7px 12px;
+  border-bottom:1px solid var(--line-soft);font-family:var(--font-cond);
+  font-size:14px;font-variant-numeric:tabular-nums;color:var(--ink-2);
+}
+.history li:last-child{border-bottom:0}
+.history .h-dice{display:flex;align-items:baseline;gap:7px;letter-spacing:.1em}
+.history .h-dice b{color:var(--ink);font-weight:600}
+.history .h-dice i{font-style:normal;font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3)}
+.history .h-res{margin-left:auto;font-size:12.5px;letter-spacing:.08em;text-transform:uppercase}
+
+.note{
+  font-family:var(--font-cond);font-size:13px;letter-spacing:.06em;color:var(--ink-3);
+  text-align:center;text-transform:uppercase;
+}
+
+/* ---------- vista: territórios ---------- */
+.stack{display:grid;gap:20px}
+.setup-rows{display:grid;gap:10px;margin:18px 0}
+.prow{
+  display:flex;flex-wrap:wrap;gap:10px;align-items:center;
+  padding:10px;background:var(--surface-2);border:1px solid var(--line-soft);border-radius:2px;
+}
+.prow .idx{
+  font-family:var(--font-cond);font-size:12px;letter-spacing:.12em;color:var(--ink-3);width:20px;
+}
+.prow input[type="text"]{
+  flex:1 1 160px;min-width:0;padding:8px 10px;background:var(--surface);
+  border:1px solid var(--line);border-radius:2px;font-size:14.5px;
+}
+.colors{display:flex;gap:5px}
+.swatch{
+  width:26px;height:26px;border-radius:50%;border:1px solid var(--line);cursor:pointer;padding:0;
+  background:var(--pc);box-shadow:inset 0 0 0 1px rgba(0,0,0,.2);
+}
+.swatch[aria-pressed="true"]{box-shadow:inset 0 0 0 1px rgba(0,0,0,.2),0 0 0 2px var(--surface),0 0 0 4px var(--ink-2)}
+.swatch:disabled{opacity:.25;cursor:not-allowed}
+.remove{
+  width:30px;height:30px;border:1px solid var(--line);background:none;border-radius:2px;
+  color:var(--ink-3);cursor:pointer;font-size:16px;line-height:1;
+}
+.remove:hover{color:var(--red);border-color:var(--red)}
+.setup-actions{display:flex;flex-wrap:wrap;gap:10px}
+.warn{
+  margin:0;padding:10px 12px;border-left:3px solid var(--brass);background:var(--surface-2);
+  color:var(--ink-2);font-size:13.5px;border-radius:0 2px 2px 0;
+}
+
+.gamebar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between}
+.gamebar .meta{font-family:var(--font-cond);font-size:13.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)}
+
+/* --- tabuleiro --- */
+.mapa-head{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:baseline;justify-content:space-between;margin-bottom:12px}
+.mapa-dica{font-family:var(--font-cond);font-size:12.5px;letter-spacing:.06em;color:var(--ink-3)}
+.mapa{
+  position:relative;width:100%;aspect-ratio:1000/620;overflow:hidden;
+  border:1px solid var(--line);border-radius:2px;
+  background:
+    repeating-linear-gradient(to right, var(--grid) 0 1px, transparent 1px 8.3333%),
+    repeating-linear-gradient(to bottom, var(--grid) 0 1px, transparent 1px 12.5%),
+    radial-gradient(120% 90% at 50% 40%, var(--oceano-claro) 0%, var(--oceano) 70%);
+}
+.pais{
+  position:absolute;inset:0;padding:0;border:0;-webkit-appearance:none;appearance:none;
+  background:var(--pc,var(--terra));cursor:pointer;
+  filter:drop-shadow(0 1px 1px rgba(0,0,0,.45));
+  transition:opacity .18s ease, filter .18s ease;
+}
+.mapa--preview .pais{cursor:default}
+.mapa:not(.mapa--preview) .pais:hover{filter:brightness(1.1) drop-shadow(0 0 5px var(--brass))}
+.pais:focus{outline:none}
+.pais:focus-visible,.pais--sel{filter:brightness(1.14) drop-shadow(0 0 7px var(--brass)) drop-shadow(0 0 2px var(--brass))}
+.mapa--focado .pais:not(.pais--vivo),
+.mapa--focado .rotulo:not(.rotulo--vivo){opacity:.22}
+
+.rotulo{
+  position:absolute;transform:translate(-50%,-50%);pointer-events:none;
+  display:grid;justify-items:center;gap:1px;line-height:1;text-align:center;
+  transition:opacity .18s ease;
+}
+.rotulo .nome{
+  font-family:var(--font-cond);font-size:9.5px;font-weight:500;letter-spacing:.04em;
+  text-transform:uppercase;white-space:nowrap;
+}
+.rotulo .qtd{
+  font-family:var(--font-cond);font-size:16px;font-weight:700;font-variant-numeric:tabular-nums;
+}
+.rotulo--claro{color:#F7F3EA;text-shadow:0 1px 2px rgba(0,0,0,.55)}
+.rotulo--escuro{color:#141B1D;text-shadow:0 1px 2px rgba(255,255,255,.35)}
+.rotulo--vago{color:var(--ink-3);text-shadow:none}
+.rotulo--vago .nome{font-size:9px}
+
+.cont-rot{
+  position:absolute;transform:translateY(-50%);pointer-events:none;white-space:nowrap;
+  font-family:var(--font-cond);font-size:10px;font-weight:600;letter-spacing:.26em;
+  text-transform:uppercase;color:var(--ink-3);
+}
+.cont-rot b{color:var(--brass);font-weight:700;letter-spacing:.1em;margin-left:5px}
+
+/* --- território selecionado --- */
+.editor{
+  margin-top:14px;padding:14px;border:1px solid var(--line);border-radius:2px;
+  background:var(--surface-2);display:flex;flex-wrap:wrap;gap:14px 22px;align-items:center;
+}
+.editor--vazio{justify-content:center;color:var(--ink-3);font-size:13.5px}
+.editor .alvo{display:flex;align-items:center;gap:10px;min-width:0}
+.editor .alvo h3{font-family:var(--font-cond);font-size:20px;font-weight:600;letter-spacing:.02em}
+.editor .alvo span{font-family:var(--font-cond);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3)}
+.campo{display:flex;align-items:center;gap:9px}
+.campo>label{font-family:var(--font-cond);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3)}
+.campo select{
+  padding:7px 10px;background:var(--surface);border:1px solid var(--line);border-radius:2px;font-size:14px;
+}
+.editor .fim{margin-left:auto}
+.step{display:flex;align-items:center;gap:2px}
+.step button{
+  width:32px;height:32px;border:1px solid var(--line);background:var(--surface);color:var(--ink-2);
+  border-radius:2px;cursor:pointer;font-family:var(--font-cond);font-size:18px;line-height:1;padding:0;
+}
+.step button:hover:not(:disabled){color:var(--ink);border-color:var(--ink-3)}
+.step button:disabled{opacity:.3;cursor:not-allowed}
+.step .n{
+  width:36px;text-align:center;font-family:var(--font-cond);font-size:19px;font-weight:700;
+  font-variant-numeric:tabular-nums;
+}
+
+/* --- placar --- */
+.placar{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(min(240px,100%),1fr))}
+.jcard{
+  background:var(--surface);border:1px solid var(--line);border-left:3px solid var(--pc);
+  border-radius:2px;box-shadow:var(--shadow);padding:13px 14px;display:grid;gap:11px;
+  cursor:pointer;text-align:left;font:inherit;color:inherit;transition:border-color .15s;
+}
+.jcard:hover{border-color:var(--ink-3);border-left-color:var(--pc)}
+.jcard[aria-pressed="true"]{border-color:var(--brass);border-left-color:var(--pc)}
+.jcard header{display:flex;align-items:center;gap:9px}
+.pchip{width:15px;height:15px;border-radius:50%;background:var(--pc);box-shadow:inset 0 0 0 1px rgba(0,0,0,.3);flex:none}
+.jcard h3{font-family:var(--font-cond);font-size:18px;font-weight:600;letter-spacing:.03em;min-width:0;overflow-wrap:anywhere}
+.jcard .pcolor{margin-left:auto;font-family:var(--font-cond);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3)}
+.pstats{margin:0;display:grid;grid-template-columns:repeat(4,1fr);gap:6px;text-align:center}
+.pstats>div{background:var(--surface-2);border-radius:2px;padding:7px 3px}
+.pstats dt{font-family:var(--font-cond);font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3)}
+.pstats dd{margin:2px 0 0;font-family:var(--font-cond);font-size:20px;font-weight:700;line-height:1;font-variant-numeric:tabular-nums}
+.pstats .hi dd{color:var(--brass)}
+.placar-nota{font-family:var(--font-cond);font-size:12.5px;letter-spacing:.06em;color:var(--ink-3);text-align:center}
+
+footer{
+  margin-top:34px;padding-top:16px;border-top:1px solid var(--line);
+  display:grid;gap:5px;color:var(--ink-3);font-size:12.5px;
+}
+footer b{color:var(--ink-2);font-weight:500}
+
+@media (max-width:720px){
+  .app{padding:0 14px 56px}
+  .arena{grid-template-columns:1fr}
+  .versus{width:auto;height:34px;writing-mode:horizontal-tb;border:0;border-top:1px solid var(--line-soft);border-bottom:1px solid var(--line-soft)}
+  .losses{grid-template-columns:1fr}
+  .brand h1{font-size:22px}
+  .switch{width:100%}
+  .switch button{flex:1}
+  .rotulo .nome{display:none}
+  .rotulo .qtd{font-size:14px}
+  .cont-rot{font-size:8.5px;letter-spacing:.16em}
+  .editor .fim{margin-left:0}
+}
+@media (prefers-reduced-motion: reduce){
+  *{animation-duration:.001ms !important;animation-iteration-count:1 !important;transition-duration:.001ms !important}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="topbar">
+    <div class="brand">
+      <svg class="rose" viewBox="0 0 48 48" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.4">
+        <circle cx="24" cy="24" r="19"/>
+        <circle cx="24" cy="24" r="13.5" stroke-dasharray="2 4"/>
+        <path d="M24 3.5 27.2 20.8 44.5 24 27.2 27.2 24 44.5 20.8 27.2 3.5 24 20.8 20.8Z" fill="currentColor" stroke="none"/>
+        <path d="M35.3 12.7 26.4 21.6M12.7 35.3l8.9-8.9M35.3 35.3l-8.9-8.9M12.7 12.7l8.9 8.9" opacity=".55"/>
+      </svg>
+      <div>
+        <h1>Mesa de Guerra</h1>
+        <p>Painel de apoio · War de tabuleiro</p>
+      </div>
+    </div>
+    <nav class="switch" role="tablist" aria-label="Seções">
+      <button type="button" role="tab" id="tab-territorios" aria-controls="view-territorios" data-view="territorios">Territórios</button>
+      <button type="button" role="tab" id="tab-dados" aria-controls="view-dados" data-view="dados">Dados</button>
+    </nav>
+  </header>
+
+  <main>
+    <!-- ================= TERRITÓRIOS ================= -->
+    <section id="view-territorios" role="tabpanel" aria-labelledby="tab-territorios" class="stack">
+      <div class="panel" id="setup-panel">
+        <p class="eyebrow">Etapa 1</p>
+        <h2>Distribuição inicial</h2>
+        <p class="hint">Sorteio dos 42 territórios entre os jogadores, com 1 peça em cada. Se o total não dividir igual, quem estiver no topo da lista recebe o território extra.</p>
+        <div class="setup-rows" id="setup-rows"></div>
+        <p class="warn" id="setup-warn" hidden></p>
+        <div class="setup-actions">
+          <button type="button" class="btn" id="add-player">Adicionar jogador</button>
+          <button type="button" class="btn btn--primary" id="deal">Sortear territórios</button>
+          <button type="button" class="btn btn--ghost" id="back-to-game" hidden>Voltar ao jogo</button>
+        </div>
+      </div>
+
+      <div class="panel" id="gamebar-panel" hidden>
+        <div class="gamebar">
+          <div>
+            <p class="eyebrow">Etapa 2</p>
+            <h2>Mesa em jogo</h2>
+          </div>
+          <div class="setup-actions">
+            <button type="button" class="btn btn--ghost" id="edit-players">Editar jogadores</button>
+            <button type="button" class="btn btn--danger" id="redeal">Sortear de novo</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="mapa-head">
+          <p class="eyebrow" style="margin:0">Tabuleiro</p>
+          <span class="mapa-dica" id="mapa-dica"></span>
+        </div>
+        <div class="mapa" id="mapa"></div>
+        <div id="editor" hidden></div>
+      </div>
+
+      <div class="placar" id="placar"></div>
+    </section>
+
+    <!-- ================= DADOS ================= -->
+    <section id="view-dados" role="tabpanel" aria-labelledby="tab-dados" hidden>
+      <div class="dice-stage">
+        <div class="arena">
+          <div class="side side--att">
+            <div class="side-head">
+              <span class="side-label">Ataque</span>
+              <div class="count" id="count-att" role="group" aria-label="Quantidade de dados de ataque"></div>
+            </div>
+            <div class="dice" id="dice-att"></div>
+          </div>
+          <div class="versus" aria-hidden="true">contra</div>
+          <div class="side side--def">
+            <div class="side-head">
+              <span class="side-label">Defesa</span>
+              <div class="count" id="count-def" role="group" aria-label="Quantidade de dados de defesa"></div>
+            </div>
+            <div class="dice" id="dice-def"></div>
+          </div>
+        </div>
+
+        <button type="button" class="roll" id="roll">Rolar<small>Barra de espaço</small></button>
+
+        <div id="verdict" aria-live="polite"></div>
+
+        <div class="panel" id="history-panel" hidden>
+          <p class="eyebrow">Rolagens anteriores</p>
+          <ul class="history" id="history" style="margin-top:8px"></ul>
+        </div>
+
+        <p class="note">Empate favorece a defesa · 1 a 3 dados de cada lado</p>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>Bônus por continente: <b>Ásia 7 · América do Norte 5 · Europa 5 · África 3 · América do Sul 2 · Oceania 2</b>. Reforços da rodada = territórios ÷ 2 (sem fração) + bônus dos continentes completos.</p>
+    <p>Os sorteios usam <b>crypto.getRandomValues</b>. A partida fica salva neste navegador.</p>
+  </footer>
+</div>
+
+<script>
+(function(){
+  'use strict';
+
+  /* ---------------- dados do tabuleiro ---------------- */
+  var CONTINENTES = [
+    {nome:'América do Norte', bonus:5, paises:['Alasca','Mackenzie','Groenlândia','Vancouver','Ottawa','Labrador','Califórnia','Nova York','México']},
+    {nome:'América do Sul', bonus:2, paises:['Venezuela','Brasil','Peru','Argentina']},
+    {nome:'Europa', bonus:5, paises:['Islândia','Inglaterra','Suécia','Alemanha','Polônia','França','Moscou']},
+    {nome:'África', bonus:3, paises:['Argélia','Egito','Sudão','Congo','África do Sul','Madagascar']},
+    {nome:'Ásia', bonus:7, paises:['Omsk','Dudinka','Sibéria','Vladivostok','Tchita','Aral','Mongólia','Japão','Oriente Médio','Índia','Vietnã','China']},
+    {nome:'Oceania', bonus:2, paises:['Sumatra','Bornéu','Nova Guiné','Austrália']}
+  ];
+  var TODOS = [];
+  var CONT_DE = {};
+  CONTINENTES.forEach(function(c, i){
+    c.paises.forEach(function(p){ TODOS.push(p); CONT_DE[p] = i; });
+  });
+
+/* ---------------- desenho do tabuleiro (espaço 1000 x 620) ---------------- */
+  var GEO = {
+    'Alasca':        [[24,88],[62,58],[104,66],[116,104],[104,132],[58,138],[26,116]],
+    'Mackenzie':     [[128,60],[200,50],[224,88],[218,124],[130,130]],
+    'Groenlândia':   [[246,26],[302,40],[316,86],[292,120],[248,112],[236,64]],
+    'Vancouver':     [[32,150],[110,140],[122,180],[112,206],[42,200],[28,176]],
+    'Ottawa':        [[134,142],[212,138],[226,178],[214,200],[136,198]],
+    'Labrador':      [[240,132],[302,130],[312,172],[286,196],[244,190],[234,160]],
+    'Califórnia':    [[46,216],[114,212],[126,250],[104,282],[60,272],[42,244]],
+    'Nova York':     [[138,208],[214,210],[224,246],[204,268],[146,262],[134,236]],
+    'México':        [[84,292],[148,282],[186,306],[190,336],[152,356],[110,346],[86,318]],
+
+    'Venezuela':     [[152,368],[224,358],[248,384],[236,412],[176,418],[152,398]],
+    'Peru':          [[146,432],[196,426],[214,462],[204,500],[164,508],[142,470]],
+    'Brasil':        [[226,424],[298,420],[318,462],[302,506],[240,514],[218,470]],
+    'Argentina':     [[172,522],[232,518],[248,552],[228,592],[190,596],[168,558]],
+
+    'Islândia':      [[352,52],[398,46],[410,78],[392,98],[358,92],[344,72]],
+    'Suécia':        [[424,40],[470,36],[484,70],[470,98],[434,96],[418,66]],
+    'Moscou':        [[498,44],[562,40],[578,78],[562,106],[506,108],[492,72]],
+    'Inglaterra':    [[348,112],[392,108],[404,140],[386,162],[352,156],[338,132]],
+    'Alemanha':      [[418,116],[468,112],[482,146],[466,170],[424,166],[410,140]],
+    'Polônia':       [[496,124],[556,120],[570,152],[552,178],[504,176],[490,148]],
+    'França':        [[404,184],[462,180],[476,212],[456,236],[412,232],[396,206]],
+
+    'Argélia':       [[392,262],[464,254],[482,286],[466,314],[404,318],[386,290]],
+    'Egito':         [[496,258],[554,254],[570,286],[552,314],[502,316],[488,286]],
+    'Sudão':         [[482,330],[548,326],[564,360],[544,388],[490,388],[474,358]],
+    'Congo':         [[396,334],[462,330],[476,364],[458,392],[404,392],[388,362]],
+    'África do Sul': [[404,406],[470,402],[488,440],[464,478],[420,478],[396,442]],
+    'Madagascar':    [[508,404],[552,400],[566,434],[548,464],[512,460],[500,430]],
+
+    'Aral':          [[592,120],[652,116],[666,148],[650,174],[600,176],[586,148]],
+    'Omsk':          [[678,110],[738,106],[752,138],[736,164],[686,166],[672,138]],
+    'Dudinka':       [[672,44],[736,40],[752,72],[734,100],[682,100],[666,72]],
+    'Sibéria':       [[764,42],[826,38],[842,70],[824,98],[772,98],[756,70]],
+    'Vladivostok':   [[850,54],[916,50],[932,84],[912,114],[860,112],[844,82]],
+    'Tchita':        [[766,112],[824,108],[840,140],[820,166],[772,164],[758,138]],
+    'Mongólia':      [[752,180],[816,176],[830,208],[810,234],[760,232],[746,206]],
+    'China':         [[842,180],[898,176],[914,210],[894,240],[850,238],[836,208]],
+    'Japão':         [[930,132],[968,128],[982,164],[966,196],[938,192],[924,160]],
+    'Oriente Médio': [[586,196],[650,192],[664,226],[644,254],[596,252],[578,222]],
+    'Índia':         [[678,196],[738,192],[754,228],[736,266],[692,268],[672,230]],
+    'Vietnã':        [[762,250],[822,246],[836,280],[816,308],[772,306],[754,278]],
+
+    'Sumatra':       [[704,330],[758,326],[772,356],[754,382],[712,380],[696,354]],
+    'Bornéu':        [[790,326],[842,322],[856,352],[838,378],[798,376],[782,350]],
+    'Nova Guiné':    [[872,330],[936,326],[950,358],[932,384],[880,382],[862,356]],
+    'Austrália':     [[796,404],[890,398],[912,438],[894,486],[820,492],[788,446]]
+  };
+
+  var ROT_CONT = {
+    'América do Norte': [26,22],
+    'América do Sul':   [256,556],
+    'Europa':           [326,254],
+    'África':           [396,510],
+    'Ásia':             [598,66],
+    'Oceania':          [854,520]
+  };
+
+  function clipDe(pts){
+    return 'polygon(' + pts.map(function(p){
+      return (Math.round(p[0] * 10) / 100) + '% ' + (Math.round(p[1] * 1000 / 6.2) / 1000) + '%';
+    }).join(', ') + ')';
+  }
+  function centroDe(pts){
+    var x = 0, y = 0;
+    pts.forEach(function(p){ x += p[0]; y += p[1]; });
+    return [x / pts.length, y / pts.length];
+  }
+  function tomTexto(hex){
+    var r = parseInt(hex.substr(1, 2), 16), g = parseInt(hex.substr(3, 2), 16), b = parseInt(hex.substr(5, 2), 16);
+    return (0.299 * r + 0.587 * g + 0.114 * b) / 255 > 0.62 ? 'escuro' : 'claro';
+  }
+
+  var CORES = [
+    {id:'azul',     nome:'Azul',     hex:'#2F6DB5'},
+    {id:'vermelho', nome:'Vermelho', hex:'#BE3B2C'},
+    {id:'amarelo',  nome:'Amarelo',  hex:'#D9A81C'},
+    {id:'verde',    nome:'Verde',    hex:'#2F8C5E'},
+    {id:'preto',    nome:'Preto',    hex:'#23282A'},
+    {id:'branco',   nome:'Branco',   hex:'#EDE9DE'}
+  ];
+  function cor(id){
+    for(var i=0;i<CORES.length;i++){ if(CORES[i].id === id) return CORES[i]; }
+    return CORES[0];
+  }
+
+  /* ---------------- sorteio ---------------- */
+  function rnd(max){
+    if(window.crypto && window.crypto.getRandomValues){
+      var limite = Math.floor(4294967296 / max) * max, buf = new Uint32Array(1), v;
+      do { window.crypto.getRandomValues(buf); v = buf[0]; } while(v >= limite);
+      return v % max;
+    }
+    return Math.floor(Math.random() * max);
+  }
+  function embaralhar(lista){
+    var a = lista.slice();
+    for(var i = a.length - 1; i > 0; i--){
+      var j = rnd(i + 1), t = a[i]; a[i] = a[j]; a[j] = t;
+    }
+    return a;
+  }
+  function dado(){ return rnd(6) + 1; }
+
+  /* ---------------- estado ---------------- */
+  var CHAVE = 'mesa-de-guerra-v1';
+  var proximoId = 1;
+  var estado = null;
+
+  function novoJogador(i){
+    return {id: 'p' + (proximoId++), nome: 'Jogador ' + (i + 1), cor: CORES[i % CORES.length].id};
+  }
+  function estadoInicial(){
+    return {
+      vista: 'territorios',
+      editando: true,
+      jogadores: [novoJogador(0), novoJogador(1), novoJogador(2)],
+      territorios: null,
+      dados: {ataque: 3, defesa: 3, ultimo: null, historico: []}
+    };
+  }
+  function salvar(){
+    try { window.localStorage.setItem(CHAVE, JSON.stringify({estado: estado, proximoId: proximoId})); } catch(e){}
+  }
+  function carregar(){
+    var bruto = null;
+    try { bruto = window.localStorage.getItem(CHAVE); } catch(e){}
+    if(!bruto) return estadoInicial();
+    try {
+      var d = JSON.parse(bruto);
+      if(!d || !d.estado || !d.estado.jogadores || !d.estado.jogadores.length) return estadoInicial();
+      proximoId = d.proximoId || (d.estado.jogadores.length + 1);
+      var e = d.estado;
+      e.dados = e.dados || {ataque:3, defesa:3, ultimo:null, historico:[]};
+      e.dados.historico = e.dados.historico || [];
+      return e;
+    } catch(err){ return estadoInicial(); }
+  }
+  estado = carregar();
+
+  /* ---------------- utilidades de partida ---------------- */
+  function jogador(id){
+    for(var i=0;i<estado.jogadores.length;i++){ if(estado.jogadores[i].id === id) return estado.jogadores[i]; }
+    return null;
+  }
+  function paisesDe(id){
+    var r = [];
+    if(!estado.territorios) return r;
+    for(var i=0;i<TODOS.length;i++){
+      var p = TODOS[i];
+      if(estado.territorios[p] && estado.territorios[p].dono === id) r.push(p);
+    }
+    return r;
+  }
+  function resumo(id){
+    var paises = paisesDe(id), pecas = 0, completos = [], bonus = 0;
+    paises.forEach(function(p){ pecas += estado.territorios[p].pecas; });
+    CONTINENTES.forEach(function(c){
+      var todos = c.paises.every(function(p){
+        return estado.territorios[p] && estado.territorios[p].dono === id;
+      });
+      if(todos){ completos.push(c); bonus += c.bonus; }
+    });
+    return {
+      paises: paises, pecas: pecas, completos: completos,
+      reforcos: Math.floor(paises.length / 2) + bonus, bonus: bonus
+    };
+  }
+  function sortear(){
+    var baralho = embaralhar(TODOS), mapa = {};
+    for(var i=0;i<baralho.length;i++){
+      mapa[baralho[i]] = {dono: estado.jogadores[i % estado.jogadores.length].id, pecas: 1};
+    }
+    estado.territorios = mapa;
+    estado.editando = false;
+    selecionado = null;
+    destaque = null;
+    salvar(); render();
+  }
+
+  /* ---------------- render: preparação ---------------- */
+  var elSetup = document.getElementById('setup-rows');
+  var elWarn  = document.getElementById('setup-warn');
+
+  function renderSetup(){
+    elSetup.innerHTML = '';
+    var usadas = estado.jogadores.map(function(j){ return j.cor; });
+    var travado = !!estado.territorios;
+
+    estado.jogadores.forEach(function(j, i){
+      var linha = document.createElement('div');
+      linha.className = 'prow';
+
+      var idx = document.createElement('span');
+      idx.className = 'idx';
+      idx.textContent = (i + 1 < 10 ? '0' : '') + (i + 1);
+      linha.appendChild(idx);
+
+      var nome = document.createElement('input');
+      nome.type = 'text';
+      nome.value = j.nome;
+      nome.maxLength = 24;
+      nome.setAttribute('aria-label', 'Nome do jogador ' + (i + 1));
+      nome.addEventListener('input', function(){
+        j.nome = nome.value;
+        salvar();
+      });
+      linha.appendChild(nome);
+
+      var cores = document.createElement('div');
+      cores.className = 'colors';
+      CORES.forEach(function(c){
+        var b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'swatch';
+        b.style.setProperty('--pc', c.hex);
+        b.title = c.nome;
+        b.setAttribute('aria-label', c.nome);
+        b.setAttribute('aria-pressed', String(j.cor === c.id));
+        b.disabled = usadas.indexOf(c.id) !== -1 && j.cor !== c.id;
+        b.addEventListener('click', function(){ j.cor = c.id; salvar(); render(); });
+        cores.appendChild(b);
+      });
+      linha.appendChild(cores);
+
+      var rem = document.createElement('button');
+      rem.type = 'button';
+      rem.className = 'remove';
+      rem.innerHTML = '&times;';
+      rem.title = 'Remover jogador';
+      rem.setAttribute('aria-label', 'Remover ' + j.nome);
+      rem.disabled = travado || estado.jogadores.length <= 2;
+      rem.addEventListener('click', function(){
+        estado.jogadores = estado.jogadores.filter(function(x){ return x.id !== j.id; });
+        salvar(); render();
+      });
+      linha.appendChild(rem);
+
+      elSetup.appendChild(linha);
+    });
+
+    var sobra = 42 % estado.jogadores.length;
+    var msgs = [];
+    if(travado) msgs.push('Nomes e cores podem ser trocados a qualquer momento. Para mudar o número de jogadores, sorteie de novo.');
+    if(sobra) msgs.push('Com ' + estado.jogadores.length + ' jogadores, ' + sobra + ' receberá' + (sobra > 1 ? 'm' : '') + ' 1 território a mais (' + Math.ceil(42 / estado.jogadores.length) + ' contra ' + Math.floor(42 / estado.jogadores.length) + ').');
+    elWarn.hidden = msgs.length === 0;
+    elWarn.textContent = msgs.join(' ');
+
+    document.getElementById('add-player').disabled = travado || estado.jogadores.length >= 6;
+    document.getElementById('back-to-game').hidden = !travado;
+    document.getElementById('deal').textContent = travado ? 'Sortear de novo' : 'Sortear territórios';
+  }
+
+  /* ---------------- render: tabuleiro ---------------- */
+  var elMapa   = document.getElementById('mapa');
+  var elDica   = document.getElementById('mapa-dica');
+  var elEditor = document.getElementById('editor');
+  var elPlacar = document.getElementById('placar');
+  var refs = {qtd: {}, stats: {}};
+  var selecionado = null;
+  var destaque = null;
+
+  function renderMapa(){
+    var preview = !estado.territorios;
+    refs.qtd = {};
+    elMapa.innerHTML = '';
+    elMapa.className = 'mapa' + (preview ? ' mapa--preview' : '') + (destaque ? ' mapa--focado' : '');
+
+    CONTINENTES.forEach(function(c){
+      var pos = ROT_CONT[c.nome];
+      var r = document.createElement('span');
+      r.className = 'cont-rot';
+      r.style.left = (pos[0] / 10) + '%';
+      r.style.top = (pos[1] / 6.2) + '%';
+      r.appendChild(document.createTextNode(c.nome));
+      var b = document.createElement('b');
+      b.textContent = '+' + c.bonus;
+      r.appendChild(b);
+      elMapa.appendChild(r);
+    });
+
+    TODOS.forEach(function(pais){
+      var t = estado.territorios ? estado.territorios[pais] : null;
+      var j = t ? jogador(t.dono) : null;
+      var c = j ? cor(j.cor) : null;
+      var cp = clipDe(GEO[pais]);
+
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'pais' + (pais === selecionado ? ' pais--sel' : '') + (destaque && t && t.dono === destaque ? ' pais--vivo' : '');
+      b.style.setProperty('clip-path', cp);
+      b.style.setProperty('-webkit-clip-path', cp);
+      if(c) b.style.setProperty('--pc', c.hex);
+      b.disabled = preview;
+      b.setAttribute('aria-label', pais + (j ? ', ' + j.nome + ', ' + t.pecas + (t.pecas > 1 ? ' peças' : ' peça') : ''));
+      b.title = pais + (j ? ' · ' + j.nome : '');
+      b.addEventListener('click', function(){
+        selecionado = (selecionado === pais) ? null : pais;
+        renderMapa(); renderEditor();
+      });
+      elMapa.appendChild(b);
+    });
+
+    TODOS.forEach(function(pais){
+      var t = estado.territorios ? estado.territorios[pais] : null;
+      var j = t ? jogador(t.dono) : null;
+      var c = j ? cor(j.cor) : null;
+      var meio = centroDe(GEO[pais]);
+
+      var rot = document.createElement('span');
+      rot.className = 'rotulo ' + (c ? 'rotulo--' + tomTexto(c.hex) : 'rotulo--vago') +
+                      (destaque && t && t.dono === destaque ? ' rotulo--vivo' : '');
+      rot.style.left = (meio[0] / 10) + '%';
+      rot.style.top = (meio[1] / 6.2) + '%';
+
+      var nome = document.createElement('span');
+      nome.className = 'nome';
+      nome.textContent = pais;
+      rot.appendChild(nome);
+
+      if(t){
+        var qtd = document.createElement('span');
+        qtd.className = 'qtd';
+        qtd.textContent = t.pecas;
+        rot.appendChild(qtd);
+        refs.qtd[pais] = qtd;
+      }
+      elMapa.appendChild(rot);
+    });
+
+    elDica.textContent = preview
+      ? 'Sorteie os territórios para pintar o tabuleiro.'
+      : (selecionado ? 'Território selecionado: ' + selecionado : 'Toque em um território para trocar o dono ou as peças.');
+  }
+
+  /* ---------------- render: território selecionado ---------------- */
+  function renderEditor(){
+    elEditor.innerHTML = '';
+    if(!estado.territorios){ elEditor.hidden = true; return; }
+    elEditor.hidden = false;
+
+    if(!selecionado){
+      elEditor.className = 'editor editor--vazio';
+      elEditor.textContent = 'Nenhum território selecionado.';
+      return;
+    }
+    elEditor.className = 'editor';
+
+    var t = estado.territorios[selecionado];
+    var j = jogador(t.dono);
+    var cont = CONTINENTES[CONT_DE[selecionado]];
+
+    var alvo = document.createElement('div');
+    alvo.className = 'alvo';
+    var chip = document.createElement('span');
+    chip.className = 'pchip';
+    chip.style.setProperty('--pc', j ? cor(j.cor).hex : 'var(--terra)');
+    var txt = document.createElement('div');
+    var h = document.createElement('h3'); h.textContent = selecionado;
+    var s = document.createElement('span'); s.textContent = cont.nome + ' · bônus +' + cont.bonus;
+    txt.appendChild(h); txt.appendChild(document.createElement('br')); txt.appendChild(s);
+    alvo.appendChild(chip); alvo.appendChild(txt);
+    elEditor.appendChild(alvo);
+
+    var campoDono = document.createElement('div');
+    campoDono.className = 'campo';
+    var lab = document.createElement('label');
+    lab.textContent = 'Dono';
+    lab.setAttribute('for', 'sel-dono');
+    var sel = document.createElement('select');
+    sel.id = 'sel-dono';
+    estado.jogadores.forEach(function(x){
+      var o = document.createElement('option');
+      o.value = x.id;
+      o.textContent = x.nome + ' (' + cor(x.cor).nome + ')';
+      if(x.id === t.dono) o.selected = true;
+      sel.appendChild(o);
+    });
+    sel.addEventListener('change', function(){
+      t.dono = sel.value;
+      salvar(); renderMapa(); renderEditor(); renderPlacar();
+    });
+    campoDono.appendChild(lab); campoDono.appendChild(sel);
+    elEditor.appendChild(campoDono);
+
+    var campoPecas = document.createElement('div');
+    campoPecas.className = 'campo fim';
+    var lab2w = document.createElement('label');
+    lab2w.textContent = 'Peças';
+    campoPecas.appendChild(lab2w);
+
+    var step = document.createElement('div');
+    step.className = 'step';
+    var menos = document.createElement('button');
+    menos.type = 'button'; menos.innerHTML = '&minus;';
+    menos.setAttribute('aria-label', 'Menos uma peça em ' + selecionado);
+    var n = document.createElement('span');
+    n.className = 'n'; n.textContent = t.pecas;
+    var mais = document.createElement('button');
+    mais.type = 'button'; mais.textContent = '+';
+    mais.setAttribute('aria-label', 'Mais uma peça em ' + selecionado);
+    menos.disabled = t.pecas <= 1;
+    mais.disabled = t.pecas >= 99;
+
+    function ajustar(delta){
+      var alvoQtd = t.pecas + delta;
+      if(alvoQtd < 1 || alvoQtd > 99) return;
+      t.pecas = alvoQtd;
+      n.textContent = alvoQtd;
+      menos.disabled = alvoQtd <= 1;
+      mais.disabled = alvoQtd >= 99;
+      if(refs.qtd[selecionado]) refs.qtd[selecionado].textContent = alvoQtd;
+      atualizarStats(t.dono);
+      salvar();
+    }
+    menos.addEventListener('click', function(){ ajustar(-1); });
+    mais.addEventListener('click', function(){ ajustar(1); });
+
+    step.appendChild(menos); step.appendChild(n); step.appendChild(mais);
+    campoPecas.appendChild(step);
+    elEditor.appendChild(campoPecas);
+  }
+
+  /* ---------------- render: placar ---------------- */
+  function tituloReforcos(r){
+    return 'Reforços = ' + r.paises.length + ' ÷ 2 = ' + Math.floor(r.paises.length / 2) +
+      (r.bonus ? ' + ' + r.bonus + ' de bônus (' + r.completos.map(function(x){ return x.nome; }).join(', ') + ')' : ' (sem bônus de continente)');
+  }
+
+  function atualizarStats(idJogador){
+    var alvo = refs.stats[idJogador];
+    if(!alvo) return;
+    var r = resumo(idJogador);
+    alvo.valores[0].textContent = r.paises.length;
+    alvo.valores[1].textContent = r.pecas;
+    alvo.valores[2].textContent = r.completos.length;
+    alvo.valores[3].textContent = r.reforcos;
+    alvo.dl.title = tituloReforcos(r);
+  }
+
+  function renderPlacar(){
+    refs.stats = {};
+    elPlacar.innerHTML = '';
+    if(!estado.territorios) return;
+
+    estado.jogadores.forEach(function(j){
+      var r = resumo(j.id), c = cor(j.cor);
+      var card = document.createElement('button');
+      card.type = 'button';
+      card.className = 'jcard';
+      card.style.setProperty('--pc', c.hex);
+      card.setAttribute('aria-pressed', String(destaque === j.id));
+      card.title = destaque === j.id ? 'Mostrar todos os territórios' : 'Destacar os territórios de ' + j.nome + ' no mapa';
+
+      var head = document.createElement('header');
+      var chip = document.createElement('span'); chip.className = 'pchip'; head.appendChild(chip);
+      var h = document.createElement('h3'); h.textContent = j.nome; head.appendChild(h);
+      var cn = document.createElement('span'); cn.className = 'pcolor'; cn.textContent = c.nome; head.appendChild(cn);
+      card.appendChild(head);
+
+      var dl = document.createElement('dl'); dl.className = 'pstats';
+      var valores = [];
+      [['Territórios', r.paises.length, ''], ['Peças', r.pecas, ''],
+       ['Continentes', r.completos.length, ''], ['Reforços', r.reforcos, 'hi']].forEach(function(s){
+        var box = document.createElement('div');
+        if(s[2]) box.className = s[2];
+        var dt = document.createElement('dt'); dt.textContent = s[0];
+        var dd = document.createElement('dd'); dd.textContent = s[1];
+        box.appendChild(dt); box.appendChild(dd); dl.appendChild(box);
+        valores.push(dd);
+      });
+      dl.title = tituloReforcos(r);
+      refs.stats[j.id] = {dl: dl, valores: valores};
+      card.appendChild(dl);
+
+      card.addEventListener('click', function(){
+        destaque = (destaque === j.id) ? null : j.id;
+        renderMapa(); renderPlacar();
+      });
+      elPlacar.appendChild(card);
+    });
+  }
+
+  /* ---------------- render: dados ---------------- */
+  var elDiceAtt = document.getElementById('dice-att');
+  var elDiceDef = document.getElementById('dice-def');
+  var elVerdict = document.getElementById('verdict');
+  var elHistory = document.getElementById('history');
+  var elHistPanel = document.getElementById('history-panel');
+  var elRoll = document.getElementById('roll');
+  var rolando = false;
+
+  function renderContadores(){
+    [['count-att','ataque'],['count-def','defesa']].forEach(function(par){
+      var el = document.getElementById(par[0]), lado = par[1];
+      el.innerHTML = '';
+      for(var i = 1; i <= 3; i++){
+        (function(n){
+          var b = document.createElement('button');
+          b.type = 'button';
+          b.textContent = n;
+          b.title = n + (n > 1 ? ' dados' : ' dado');
+          b.setAttribute('aria-pressed', String(estado.dados[lado] === n));
+          b.addEventListener('click', function(){
+            if(rolando) return;
+            estado.dados[lado] = n;
+            estado.dados.ultimo = null;
+            salvar(); renderDados();
+          });
+          el.appendChild(b);
+        })(i);
+      }
+    });
+  }
+
+  function criarDado(valor, lado, usado, marcado){
+    var wrap = document.createElement('div'); wrap.className = 'die-wrap';
+    var d = document.createElement('div');
+    d.className = 'die die--' + (lado === 'ataque' ? 'att' : 'def');
+    if(valor == null){ d.classList.add('die--idle'); d.setAttribute('data-v', '1'); }
+    else d.setAttribute('data-v', String(valor));
+    if(usado === false) d.classList.add('die--unused');
+    for(var i = 0; i < 9; i++){ var p = document.createElement('span'); p.className = 'pip'; d.appendChild(p); }
+    wrap.appendChild(d);
+    var tag = document.createElement('span'); tag.className = 'die-tag';
+    tag.textContent = usado === false ? 'sem par' : (marcado || '');
+    wrap.appendChild(tag);
+    return wrap;
+  }
+
+  function renderDados(){
+    renderContadores();
+    var u = estado.dados.ultimo;
+    [['ataque', elDiceAtt], ['defesa', elDiceDef]].forEach(function(par){
+      var lado = par[0], el = par[1];
+      el.innerHTML = '';
+      var qtd = estado.dados[lado];
+      var valores = u ? u[lado] : null;
+      var pares = u ? Math.min(u.ataque.length, u.defesa.length) : 0;
+      for(var i = 0; i < qtd; i++){
+        var v = valores ? valores[i] : null;
+        var usado = valores ? (i < pares) : null;
+        var marca = '';
+        if(u && i < pares) marca = (u.pares[i].vencedor === lado) ? 'vence' : '';
+        el.appendChild(criarDado(v, lado, usado, marca));
+      }
+    });
+    renderVeredito();
+    renderHistorico();
+  }
+
+  function renderVeredito(){
+    var u = estado.dados.ultimo;
+    elVerdict.innerHTML = '';
+    if(!u){
+      var vazio = document.createElement('div');
+      vazio.className = 'verdict verdict--empty';
+      vazio.textContent = 'Escolha quantos dados cada lado usa e role.';
+      elVerdict.appendChild(vazio);
+      return;
+    }
+    var box = document.createElement('div'); box.className = 'verdict';
+
+    var perdas = document.createElement('div'); perdas.className = 'losses';
+    [['att', 'Ataque perde', u.perdasAtaque], ['def', 'Defesa perde', u.perdasDefesa]].forEach(function(p){
+      var d = document.createElement('div');
+      d.className = 'loss loss--' + p[0];
+      var lbl = document.createElement('span'); lbl.className = 'lbl'; lbl.textContent = p[1];
+      var val = document.createElement('span'); val.className = 'val';
+      var b = document.createElement('b'); b.textContent = p[2];
+      var un = document.createElement('span'); un.className = 'un'; un.textContent = p[2] === 1 ? 'peça' : 'peças';
+      val.appendChild(b); val.appendChild(un);
+      d.appendChild(lbl); d.appendChild(val); perdas.appendChild(d);
+    });
+    box.appendChild(perdas);
+
+    var ol = document.createElement('ul'); ol.className = 'pairs';
+    u.pares.forEach(function(par, i){
+      var li = document.createElement('li');
+      var a = document.createElement('span'); a.className = 'v v--att'; a.textContent = par.ataque;
+      var w = document.createElement('span'); w.className = 'who';
+      w.innerHTML = 'Dado ' + (i + 1) + ' &middot; <b>' + (par.vencedor === 'ataque' ? 'ataque' : 'defesa') + '</b>' + (par.ataque === par.defesa ? ' (empate)' : '');
+      var d = document.createElement('span'); d.className = 'v v--def'; d.textContent = par.defesa;
+      li.appendChild(a); li.appendChild(w); li.appendChild(d);
+      ol.appendChild(li);
+    });
+    box.appendChild(ol);
+    elVerdict.appendChild(box);
+  }
+
+  function renderHistorico(){
+    var h = estado.dados.historico;
+    elHistPanel.hidden = !h.length;
+    elHistory.innerHTML = '';
+    h.forEach(function(r){
+      var li = document.createElement('li');
+      var d = document.createElement('span');
+      d.className = 'h-dice';
+      d.innerHTML = '<b>' + r.ataque.join(' ') + '</b><i>contra</i><b>' + r.defesa.join(' ') + '</b>';
+      var res = document.createElement('span');
+      res.className = 'h-res';
+      res.textContent = '−' + r.perdasAtaque + ' ataque · −' + r.perdasDefesa + ' defesa';
+      li.appendChild(d); li.appendChild(res);
+      elHistory.appendChild(li);
+    });
+  }
+
+  function resolver(ataque, defesa){
+    var a = ataque.slice().sort(function(x, y){ return y - x; });
+    var d = defesa.slice().sort(function(x, y){ return y - x; });
+    var n = Math.min(a.length, d.length), pares = [], pa = 0, pd = 0;
+    for(var i = 0; i < n; i++){
+      var venceAtaque = a[i] > d[i];
+      if(venceAtaque) pd++; else pa++;
+      pares.push({ataque: a[i], defesa: d[i], vencedor: venceAtaque ? 'ataque' : 'defesa'});
+    }
+    return {ataque: a, defesa: d, pares: pares, perdasAtaque: pa, perdasDefesa: pd};
+  }
+
+  function rolar(){
+    if(rolando) return;
+    rolando = true;
+    elRoll.disabled = true;
+
+    var res = resolver(
+      Array.apply(null, Array(estado.dados.ataque)).map(dado),
+      Array.apply(null, Array(estado.dados.defesa)).map(dado)
+    );
+
+    var reduz = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    function concluir(){
+      estado.dados.ultimo = res;
+      estado.dados.historico = [{
+        ataque: res.ataque, defesa: res.defesa,
+        perdasAtaque: res.perdasAtaque, perdasDefesa: res.perdasDefesa
+      }].concat(estado.dados.historico).slice(0, 8);
+      rolando = false;
+      elRoll.disabled = false;
+      salvar(); renderDados();
+    }
+
+    if(reduz){ concluir(); return; }
+
+    estado.dados.ultimo = null;
+    renderDados();
+    var faces = document.querySelectorAll('.dice .die');
+    for(var i = 0; i < faces.length; i++){
+      faces[i].classList.remove('die--idle');
+      faces[i].classList.add('die--rolling');
+    }
+    var giro = window.setInterval(function(){
+      for(var i = 0; i < faces.length; i++){ faces[i].setAttribute('data-v', String(dado())); }
+    }, 70);
+    window.setTimeout(function(){ window.clearInterval(giro); concluir(); }, 620);
+  }
+
+  /* ---------------- navegação e render geral ---------------- */
+  function mostrarVista(v){
+    estado.vista = v;
+    ['territorios', 'dados'].forEach(function(nome){
+      var painel = document.getElementById('view-' + nome);
+      var aba = document.getElementById('tab-' + nome);
+      painel.hidden = nome !== v;
+      aba.setAttribute('aria-selected', String(nome === v));
+      aba.setAttribute('tabindex', nome === v ? '0' : '-1');
+    });
+    salvar();
+  }
+
+  function render(){
+    if(!estado.territorios) estado.editando = true;
+    if(selecionado && (!estado.territorios || !estado.territorios[selecionado])) selecionado = null;
+    if(destaque && !jogador(destaque)) destaque = null;
+    var emJogo = !!estado.territorios && !estado.editando;
+    document.getElementById('setup-panel').hidden = emJogo;
+    document.getElementById('gamebar-panel').hidden = !emJogo;
+    if(!emJogo) renderSetup();
+    renderMapa();
+    renderEditor();
+    renderPlacar();
+    renderDados();
+    mostrarVista(estado.vista === 'dados' ? 'dados' : 'territorios');
+  }
+
+  document.querySelectorAll('.switch button').forEach(function(b){
+    b.addEventListener('click', function(){ mostrarVista(b.getAttribute('data-view')); });
+  });
+  document.getElementById('add-player').addEventListener('click', function(){
+    if(estado.jogadores.length >= 6) return;
+    var livres = CORES.filter(function(c){
+      return estado.jogadores.every(function(j){ return j.cor !== c.id; });
+    });
+    var j = novoJogador(estado.jogadores.length);
+    if(livres.length) j.cor = livres[0].id;
+    estado.jogadores.push(j);
+    salvar(); render();
+  });
+  document.getElementById('deal').addEventListener('click', sortear);
+  document.getElementById('back-to-game').addEventListener('click', function(){
+    estado.editando = false; salvar(); render();
+  });
+  document.getElementById('edit-players').addEventListener('click', function(){
+    estado.editando = true; salvar(); render();
+  });
+
+  var confirmando = null;
+  var btnRedeal = document.getElementById('redeal');
+  btnRedeal.addEventListener('click', function(){
+    if(confirmando){
+      window.clearTimeout(confirmando); confirmando = null;
+      btnRedeal.textContent = 'Sortear de novo';
+      sortear();
+      return;
+    }
+    btnRedeal.textContent = 'Confirmar novo sorteio';
+    confirmando = window.setTimeout(function(){
+      confirmando = null; btnRedeal.textContent = 'Sortear de novo';
+    }, 4000);
+  });
+
+  elRoll.addEventListener('click', rolar);
+  document.addEventListener('keydown', function(e){
+    if(e.key !== ' ' && e.key !== 'Spacebar') return;
+    if(estado.vista !== 'dados') return;
+    var alvo = e.target;
+    if(alvo && alvo !== document.body) return;
+    e.preventDefault();
+    rolar();
+  });
+
+  render();
+})();
+</script>
+</body>
+</html>
