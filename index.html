@@ -176,7 +176,7 @@ button,input,select{font:inherit;color:inherit}
 .side--def .side-label{color:var(--steel)}
 .count{display:flex;gap:2px;padding:3px;background:var(--surface-2);border:1px solid var(--line);border-radius:2px}
 .count button{
-  width:34px;height:30px;background:none;border:0;cursor:pointer;border-radius:1px;
+  min-width:34px;height:30px;padding:0 6px;background:none;border:0;cursor:pointer;border-radius:1px;
   font-family:var(--font-cond);font-size:16px;font-weight:600;color:var(--ink-2);
 }
 .count button[aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:var(--shadow)}
@@ -210,6 +210,19 @@ button,input,select{font:inherit;color:inherit}
 .die-tag{
   font-family:var(--font-cond);font-size:10px;letter-spacing:.14em;text-transform:uppercase;
   color:var(--ink-3);height:12px;
+}
+
+/* muitos contra muitos: dados encolhem conforme a quantidade */
+.dice--md{gap:7px}
+.dice--md .die{width:38px;height:38px;border-radius:6px;padding:5px;gap:1px}
+.dice--md .die .pip{width:7px;height:7px}
+.dice--sm{gap:5px}
+.dice--sm .die{width:24px;height:24px;border-radius:4px;padding:3px;gap:1px}
+.dice--sm .die .pip{width:4px;height:4px}
+.dice--md .die-wrap,.dice--sm .die-wrap{gap:0}
+.dice--md .die-tag,.dice--sm .die-tag{display:none}
+.die--vence{
+  box-shadow:inset 0 0 0 2px var(--brass), inset 0 -4px 8px -4px rgba(0,0,0,.45), 0 3px 8px -3px rgba(0,0,0,.55);
 }
 @keyframes tumble{
   0%{transform:translateY(0) rotate(0)}
@@ -247,6 +260,7 @@ button,input,select{font:inherit;color:inherit}
 .loss--def b{color:var(--steel)}
 .loss .un{font-family:var(--font-cond);font-size:14px;letter-spacing:.08em;color:var(--ink-2)}
 .pairs{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+.pairs--longa{max-height:320px;overflow-y:auto;padding-right:4px}
 .pairs li{
   display:grid;grid-template-columns:44px 1fr 44px;align-items:center;gap:12px;
   padding:8px 12px;background:var(--surface-2);border-radius:2px;
@@ -276,6 +290,54 @@ button,input,select{font:inherit;color:inherit}
   font-family:var(--font-cond);font-size:13px;letter-spacing:.06em;color:var(--ink-3);
   text-align:center;text-transform:uppercase;
 }
+
+/* ---------- vista: trocas ---------- */
+.troca-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:18px 0 0}
+.troca-box{
+  padding:12px 14px;border:1px solid var(--line);background:var(--surface-2);
+  border-radius:2px;display:grid;gap:3px;
+}
+.troca-box--ord{border-left:3px solid var(--steel)}
+.troca-box--val{border-left:3px solid var(--brass)}
+.troca-box .lbl{
+  font-family:var(--font-cond);font-size:12px;font-weight:600;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--ink-3);
+}
+.troca-box .val{display:flex;align-items:baseline;gap:7px}
+.troca-box b{
+  font-family:var(--font-cond);font-size:34px;font-weight:700;line-height:1;
+  font-variant-numeric:tabular-nums;
+}
+.troca-box--ord b{color:var(--steel)}
+.troca-box--val b{color:var(--brass)}
+.troca-box .un{font-family:var(--font-cond);font-size:14px;letter-spacing:.08em;color:var(--ink-2)}
+.troca-conta{
+  grid-column:1/-1;margin:0;font-family:var(--font-cond);font-size:13.5px;
+  letter-spacing:.05em;color:var(--ink-3);
+}
+.troca-ops{
+  display:flex;flex-wrap:wrap;gap:14px 24px;align-items:center;
+  margin-top:16px;padding-top:16px;border-top:1px solid var(--line-soft);
+}
+.troca-seq{
+  list-style:none;margin:16px 0 14px;padding:0;display:grid;gap:6px;
+  grid-template-columns:repeat(auto-fit,minmax(74px,1fr));
+}
+.troca-seq li{
+  background:var(--surface-2);border:1px solid var(--line-soft);border-radius:2px;
+  padding:8px 4px;text-align:center;font-family:var(--font-cond);font-variant-numeric:tabular-nums;
+}
+.troca-seq .ord{display:block;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3)}
+.troca-seq .qtd{display:block;font-size:22px;font-weight:700;line-height:1.15;margin-top:2px}
+.troca-seq li.feita{opacity:.4}
+.troca-seq li.feita .qtd{text-decoration:line-through}
+.troca-seq li.atual{border-color:var(--brass);box-shadow:inset 0 0 0 1px var(--brass)}
+.troca-seq li.atual .ord{color:var(--brass)}
+.troca-seq li.atual .qtd{color:var(--brass)}
+.jcard.jcard--flat{cursor:default}
+.jcard.jcard--flat:hover{border-color:var(--line)}
+.pstats.pstats--2{grid-template-columns:repeat(2,1fr)}
+@media (max-width:520px){.troca-grid{grid-template-columns:1fr}}
 
 /* ---------- vista: territórios ---------- */
 .stack{display:grid;gap:20px}
@@ -412,7 +474,7 @@ footer b{color:var(--ink-2);font-weight:500}
   .losses{grid-template-columns:1fr}
   .brand h1{font-size:22px}
   .switch{width:100%}
-  .switch button{flex:1}
+  .switch button{flex:1;padding:8px 8px;font-size:13px;letter-spacing:.08em}
   #setup-panel,#gamebar-panel{order:1}
   #mapa-panel{order:2}
   #placar{order:3}
@@ -444,6 +506,7 @@ footer b{color:var(--ink-2);font-weight:500}
     </div>
     <nav class="switch" role="tablist" aria-label="Seções">
       <button type="button" role="tab" id="tab-territorios" aria-controls="view-territorios" data-view="territorios">Territórios</button>
+      <button type="button" role="tab" id="tab-trocas" aria-controls="view-trocas" data-view="trocas">Trocas</button>
       <button type="button" role="tab" id="tab-dados" aria-controls="view-dados" data-view="dados">Dados</button>
     </nav>
   </header>
@@ -489,6 +552,58 @@ footer b{color:var(--ink-2);font-weight:500}
       </div>
     </section>
 
+    <!-- ================= TROCAS ================= -->
+    <section id="view-trocas" role="tabpanel" aria-labelledby="tab-trocas" class="stack" hidden>
+      <div class="panel">
+        <p class="eyebrow">Cartas</p>
+        <h2>Troca de cartas</h2>
+        <p class="hint">A contagem é da mesa: cada conjunto de três cartas vale mais que o anterior, na ordem em que as trocas acontecem, seja qual for o jogador.</p>
+
+        <div class="troca-grid">
+          <div class="troca-box troca-box--ord">
+            <span class="lbl">Próxima troca</span>
+            <span class="val"><b id="troca-ordem">1ª</b><span class="un">da partida</span></span>
+          </div>
+          <div class="troca-box troca-box--val">
+            <span class="lbl">Vai receber</span>
+            <span class="val"><b id="troca-valor">4</b><span class="un" id="troca-valor-un">tropas</span></span>
+          </div>
+          <p class="troca-conta" id="troca-conta"></p>
+        </div>
+
+        <div class="troca-ops">
+          <div class="campo">
+            <label id="troca-bonus-lbl">Cartas com território seu</label>
+            <div class="count" id="troca-bonus" role="group" aria-labelledby="troca-bonus-lbl"></div>
+          </div>
+          <div class="campo">
+            <label for="troca-quem">Quem trocou</label>
+            <select id="troca-quem"></select>
+          </div>
+        </div>
+
+        <div class="setup-actions" style="margin-top:16px">
+          <button type="button" class="btn btn--primary" id="troca-add">Registrar troca</button>
+          <button type="button" class="btn btn--ghost" id="troca-undo">Desfazer</button>
+          <button type="button" class="btn btn--danger" id="troca-reset">Zerar contagem</button>
+        </div>
+      </div>
+
+      <div class="panel">
+        <p class="eyebrow">Tabela</p>
+        <h2>Sequência de valores</h2>
+        <ol class="troca-seq" id="troca-seq"></ol>
+        <p class="hint">4 · 6 · 8 · 10 · 12 · 15 e, da sétima troca em diante, sempre 5 a mais que a anterior.</p>
+      </div>
+
+      <div class="placar" id="troca-placar"></div>
+
+      <div class="panel" id="troca-hist-panel" hidden>
+        <p class="eyebrow">Trocas registradas</p>
+        <ul class="history" id="troca-hist" style="margin-top:8px"></ul>
+      </div>
+    </section>
+
     <!-- ================= DADOS ================= -->
     <section id="view-dados" role="tabpanel" aria-labelledby="tab-dados" hidden>
       <div class="dice-stage">
@@ -519,7 +634,7 @@ footer b{color:var(--ink-2);font-weight:500}
           <ul class="history" id="history" style="margin-top:8px"></ul>
         </div>
 
-        <p class="note">Empate favorece a defesa · 1 a 3 dados de cada lado</p>
+        <p class="note">Empate favorece a defesa · 1, 2, 3, 10 ou 50 dados de cada lado</p>
       </div>
     </section>
   </main>
@@ -698,6 +813,10 @@ footer b{color:var(--ink-2);font-weight:500}
   }
   function dado(){ return rnd(6) + 1; }
 
+  /* quantidades de dados por lado; 10 e 50 para muitos contra muitos */
+  var OPCOES_DADOS = [1, 2, 3, 10, 50];
+  function qtdValida(n){ return OPCOES_DADOS.indexOf(n) >= 0 ? n : 3; }
+
   /* ---------------- estado ---------------- */
   var CHAVE = 'mesa-de-guerra-v1';
   var proximoId = 1;
@@ -712,6 +831,7 @@ footer b{color:var(--ink-2);font-weight:500}
       editando: true,
       jogadores: [novoJogador(0), novoJogador(1), novoJogador(2)],
       territorios: null,
+      trocas: {historico: [], bonus: 0, quem: null},
       dados: {ataque: 3, defesa: 3, ultimo: null, historico: []}
     };
   }
@@ -728,7 +848,12 @@ footer b{color:var(--ink-2);font-weight:500}
       proximoId = d.proximoId || (d.estado.jogadores.length + 1);
       var e = d.estado;
       e.dados = e.dados || {ataque:3, defesa:3, ultimo:null, historico:[]};
+      e.dados.ataque = qtdValida(e.dados.ataque);
+      e.dados.defesa = qtdValida(e.dados.defesa);
       e.dados.historico = e.dados.historico || [];
+      e.trocas = e.trocas || {historico:[], bonus:0, quem:null};
+      e.trocas.historico = e.trocas.historico || [];
+      e.trocas.bonus = e.trocas.bonus || 0;
       return e;
     } catch(err){ return estadoInicial(); }
   }
@@ -769,6 +894,7 @@ footer b{color:var(--ink-2);font-weight:500}
     }
     estado.territorios = mapa;
     estado.editando = false;
+    zerarTrocas();
     selecionado = null;
     destaque = null;
     salvar(); render();
@@ -1144,6 +1270,217 @@ footer b{color:var(--ink-2);font-weight:500}
     });
   }
 
+  /* ---------------- render: trocas ---------------- */
+  var TROCA_TABELA = [4, 6, 8, 10, 12, 15];
+  var TROCA_PASSO = 5;
+
+  function valorTroca(n){
+    if(n < 1) return TROCA_TABELA[0];
+    if(n <= TROCA_TABELA.length) return TROCA_TABELA[n - 1];
+    return TROCA_TABELA[TROCA_TABELA.length - 1] + TROCA_PASSO * (n - TROCA_TABELA.length);
+  }
+  function tropas(n){ return n + (n === 1 ? ' tropa' : ' tropas'); }
+  function zerarTrocas(){
+    var quem = estado.trocas ? estado.trocas.quem : null;
+    estado.trocas = {historico: [], bonus: 0, quem: quem};
+  }
+
+  var elTrOrdem     = document.getElementById('troca-ordem');
+  var elTrValor     = document.getElementById('troca-valor');
+  var elTrUn        = document.getElementById('troca-valor-un');
+  var elTrConta     = document.getElementById('troca-conta');
+  var elTrBonus     = document.getElementById('troca-bonus');
+  var elTrQuem      = document.getElementById('troca-quem');
+  var elTrSeq       = document.getElementById('troca-seq');
+  var elTrPlacar    = document.getElementById('troca-placar');
+  var elTrHist      = document.getElementById('troca-hist');
+  var elTrHistPanel = document.getElementById('troca-hist-panel');
+  var btnTrUndo     = document.getElementById('troca-undo');
+  var btnTrReset    = document.getElementById('troca-reset');
+
+  function renderTrocaBonus(){
+    var atual = estado.trocas.bonus || 0;
+    elTrBonus.innerHTML = '';
+    [0, 2, 4, 6].forEach(function(v){
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.textContent = v ? '+' + v : '0';
+      b.title = v
+        ? (v / 2) + (v === 2 ? ' carta' : ' cartas') + ' de território seu: +' + v + ' tropas'
+        : 'Nenhuma carta de território seu';
+      b.setAttribute('aria-pressed', String(atual === v));
+      b.addEventListener('click', function(){
+        estado.trocas.bonus = v;
+        salvar(); renderTrocas();
+      });
+      elTrBonus.appendChild(b);
+    });
+  }
+
+  function renderTrocaQuem(){
+    var t = estado.trocas;
+    if(t.quem && !jogador(t.quem)) t.quem = null;
+    elTrQuem.innerHTML = '';
+    var vazio = document.createElement('option');
+    vazio.value = '';
+    vazio.textContent = 'Não anotar';
+    elTrQuem.appendChild(vazio);
+    estado.jogadores.forEach(function(j){
+      var o = document.createElement('option');
+      o.value = j.id;
+      o.textContent = j.nome;
+      elTrQuem.appendChild(o);
+    });
+    elTrQuem.value = t.quem || '';
+  }
+
+  function renderTrocaSeq(feitas){
+    var ate = Math.max(feitas + 4, 10);
+    elTrSeq.innerHTML = '';
+    for(var n = 1; n <= ate; n++){
+      var li = document.createElement('li');
+      if(n <= feitas){ li.className = 'feita'; li.title = 'Troca já registrada'; }
+      else if(n === feitas + 1){ li.className = 'atual'; li.title = 'É a troca que vem agora'; }
+      var ord = document.createElement('span');
+      ord.className = 'ord';
+      ord.textContent = n + 'ª';
+      var qtd = document.createElement('span');
+      qtd.className = 'qtd';
+      qtd.textContent = valorTroca(n);
+      li.appendChild(ord); li.appendChild(qtd);
+      elTrSeq.appendChild(li);
+    }
+  }
+
+  function renderTrocaPlacar(){
+    elTrPlacar.innerHTML = '';
+    var porJogador = {};
+    estado.trocas.historico.forEach(function(x){
+      if(!x.jogador) return;
+      if(!porJogador[x.jogador]) porJogador[x.jogador] = {trocas: 0, tropas: 0};
+      porJogador[x.jogador].trocas += 1;
+      porJogador[x.jogador].tropas += x.valor + (x.bonus || 0);
+    });
+    estado.jogadores.forEach(function(j){
+      var d = porJogador[j.id];
+      if(!d) return;
+      var c = cor(j.cor);
+      var card = document.createElement('div');
+      card.className = 'jcard jcard--flat';
+      card.style.setProperty('--pc', c.hex);
+
+      var head = document.createElement('header');
+      var chip = document.createElement('span'); chip.className = 'pchip'; head.appendChild(chip);
+      var h = document.createElement('h3'); h.textContent = j.nome; head.appendChild(h);
+      var cn = document.createElement('span'); cn.className = 'pcolor'; cn.textContent = c.nome; head.appendChild(cn);
+      card.appendChild(head);
+
+      var dl = document.createElement('dl'); dl.className = 'pstats pstats--2';
+      [['Trocas', d.trocas, ''], ['Tropas', d.tropas, 'hi']].forEach(function(s){
+        var box = document.createElement('div');
+        if(s[2]) box.className = s[2];
+        var dt = document.createElement('dt'); dt.textContent = s[0];
+        var dd = document.createElement('dd'); dd.textContent = s[1];
+        box.appendChild(dt); box.appendChild(dd); dl.appendChild(box);
+      });
+      dl.title = j.nome + ' recebeu ' + tropas(d.tropas) + ' em ' + d.trocas + (d.trocas === 1 ? ' troca' : ' trocas');
+      card.appendChild(dl);
+      elTrPlacar.appendChild(card);
+    });
+  }
+
+  function renderTrocaHist(){
+    var h = estado.trocas.historico;
+    elTrHistPanel.hidden = !h.length;
+    elTrHist.innerHTML = '';
+    for(var i = h.length - 1; i >= 0; i--){
+      var x = h[i];
+      var quem = x.jogador ? jogador(x.jogador) : null;
+      var li = document.createElement('li');
+
+      var esq = document.createElement('span');
+      esq.className = 'h-dice';
+      var b = document.createElement('b'); b.textContent = x.n + 'ª'; esq.appendChild(b);
+      var nome = document.createElement('i'); nome.textContent = quem ? quem.nome : 'troca'; esq.appendChild(nome);
+      li.appendChild(esq);
+
+      var res = document.createElement('span');
+      res.className = 'h-res';
+      res.textContent = tropas(x.valor + (x.bonus || 0)) + (x.bonus ? ' (' + x.valor + ' + ' + x.bonus + ')' : '');
+      li.appendChild(res);
+
+      elTrHist.appendChild(li);
+    }
+  }
+
+  function renderTrocas(){
+    var t = estado.trocas;
+    var feitas = t.historico.length;
+    var prox = feitas + 1;
+    var base = valorTroca(prox);
+    var bonus = t.bonus || 0;
+    var total = base + bonus;
+
+    elTrOrdem.textContent = prox + 'ª';
+    elTrValor.textContent = total;
+    elTrUn.textContent = total === 1 ? 'tropa' : 'tropas';
+
+    var partes = [];
+    if(feitas){
+      var soma = 0;
+      t.historico.forEach(function(x){ soma += x.valor + (x.bonus || 0); });
+      partes.push(feitas + (feitas === 1 ? ' troca já feita' : ' trocas já feitas'));
+      partes.push(soma + ' tropas entregues até aqui');
+    } else {
+      partes.push('nenhuma troca registrada ainda');
+    }
+    partes.push(bonus ? base + ' da tabela + ' + bonus + ' pelas cartas de território seu' : 'valor de tabela, sem bônus de território');
+    partes.push('a troca seguinte vai valer ' + tropas(valorTroca(prox + 1)));
+    elTrConta.textContent = partes.join(' · ') + '.';
+
+    btnTrUndo.disabled = !feitas;
+    btnTrReset.disabled = !feitas;
+
+    renderTrocaBonus();
+    renderTrocaQuem();
+    renderTrocaSeq(feitas);
+    renderTrocaPlacar();
+    renderTrocaHist();
+  }
+
+  elTrQuem.addEventListener('change', function(){
+    estado.trocas.quem = elTrQuem.value || null;
+    salvar();
+  });
+  document.getElementById('troca-add').addEventListener('click', function(){
+    var t = estado.trocas;
+    var n = t.historico.length + 1;
+    t.historico.push({n: n, valor: valorTroca(n), bonus: t.bonus || 0, jogador: t.quem || null});
+    t.bonus = 0;
+    salvar(); renderTrocas();
+  });
+  btnTrUndo.addEventListener('click', function(){
+    var x = estado.trocas.historico.pop();
+    if(!x) return;
+    estado.trocas.bonus = x.bonus || 0;
+    salvar(); renderTrocas();
+  });
+  var confirmandoTroca = null;
+  function pararConfirmacaoTroca(){
+    if(confirmandoTroca){ window.clearTimeout(confirmandoTroca); confirmandoTroca = null; }
+    btnTrReset.textContent = 'Zerar contagem';
+  }
+  btnTrReset.addEventListener('click', function(){
+    if(confirmandoTroca){
+      pararConfirmacaoTroca();
+      zerarTrocas();
+      salvar(); renderTrocas();
+      return;
+    }
+    btnTrReset.textContent = 'Confirmar zerar';
+    confirmandoTroca = window.setTimeout(pararConfirmacaoTroca, 4000);
+  });
+
   /* ---------------- render: dados ---------------- */
   var elDiceAtt = document.getElementById('dice-att');
   var elDiceDef = document.getElementById('dice-def');
@@ -1157,22 +1494,20 @@ footer b{color:var(--ink-2);font-weight:500}
     [['count-att','ataque'],['count-def','defesa']].forEach(function(par){
       var el = document.getElementById(par[0]), lado = par[1];
       el.innerHTML = '';
-      for(var i = 1; i <= 3; i++){
-        (function(n){
-          var b = document.createElement('button');
-          b.type = 'button';
-          b.textContent = n;
-          b.title = n + (n > 1 ? ' dados' : ' dado');
-          b.setAttribute('aria-pressed', String(estado.dados[lado] === n));
-          b.addEventListener('click', function(){
-            if(rolando) return;
-            estado.dados[lado] = n;
-            estado.dados.ultimo = null;
-            salvar(); renderDados();
-          });
-          el.appendChild(b);
-        })(i);
-      }
+      OPCOES_DADOS.forEach(function(n){
+        var b = document.createElement('button');
+        b.type = 'button';
+        b.textContent = n;
+        b.title = n + (n > 1 ? ' dados' : ' dado');
+        b.setAttribute('aria-pressed', String(estado.dados[lado] === n));
+        b.addEventListener('click', function(){
+          if(rolando) return;
+          estado.dados[lado] = n;
+          estado.dados.ultimo = null;
+          salvar(); renderDados();
+        });
+        el.appendChild(b);
+      });
     });
   }
 
@@ -1183,6 +1518,7 @@ footer b{color:var(--ink-2);font-weight:500}
     if(valor == null){ d.classList.add('die--idle'); d.setAttribute('data-v', '1'); }
     else d.setAttribute('data-v', String(valor));
     if(usado === false) d.classList.add('die--unused');
+    if(marcado === 'vence') d.classList.add('die--vence');
     for(var i = 0; i < 9; i++){ var p = document.createElement('span'); p.className = 'pip'; d.appendChild(p); }
     wrap.appendChild(d);
     var tag = document.createElement('span'); tag.className = 'die-tag';
@@ -1194,9 +1530,12 @@ footer b{color:var(--ink-2);font-weight:500}
   function renderDados(){
     renderContadores();
     var u = estado.dados.ultimo;
+    var maior = Math.max(estado.dados.ataque, estado.dados.defesa);
+    var escala = maior > 12 ? ' dice--sm' : (maior > 3 ? ' dice--md' : '');
     [['ataque', elDiceAtt], ['defesa', elDiceDef]].forEach(function(par){
       var lado = par[0], el = par[1];
       el.innerHTML = '';
+      el.className = 'dice' + escala;
       var qtd = estado.dados[lado];
       var valores = u ? u[lado] : null;
       var pares = u ? Math.min(u.ataque.length, u.defesa.length) : 0;
@@ -1237,7 +1576,8 @@ footer b{color:var(--ink-2);font-weight:500}
     });
     box.appendChild(perdas);
 
-    var ol = document.createElement('ul'); ol.className = 'pairs';
+    var ol = document.createElement('ul');
+    ol.className = 'pairs' + (u.pares.length > 8 ? ' pairs--longa' : '');
     u.pares.forEach(function(par, i){
       var li = document.createElement('li');
       var a = document.createElement('span'); a.className = 'v v--att'; a.textContent = par.ataque;
@@ -1251,6 +1591,10 @@ footer b{color:var(--ink-2);font-weight:500}
     elVerdict.appendChild(box);
   }
 
+  function resumoValores(v){
+    return v.length > 8 ? v.slice(0, 8).join(' ') + ' … (' + v.length + ')' : v.join(' ');
+  }
+
   function renderHistorico(){
     var h = estado.dados.historico;
     elHistPanel.hidden = !h.length;
@@ -1259,7 +1603,7 @@ footer b{color:var(--ink-2);font-weight:500}
       var li = document.createElement('li');
       var d = document.createElement('span');
       d.className = 'h-dice';
-      d.innerHTML = '<b>' + r.ataque.join(' ') + '</b><i>contra</i><b>' + r.defesa.join(' ') + '</b>';
+      d.innerHTML = '<b>' + resumoValores(r.ataque) + '</b><i>contra</i><b>' + resumoValores(r.defesa) + '</b>';
       var res = document.createElement('span');
       res.className = 'h-res';
       res.textContent = '−' + r.perdasAtaque + ' ataque · −' + r.perdasDefesa + ' defesa';
@@ -1318,9 +1662,11 @@ footer b{color:var(--ink-2);font-weight:500}
   }
 
   /* ---------------- navegação e render geral ---------------- */
+  var VISTAS = ['territorios', 'trocas', 'dados'];
+
   function mostrarVista(v){
     estado.vista = v;
-    ['territorios', 'dados'].forEach(function(nome){
+    VISTAS.forEach(function(nome){
       var painel = document.getElementById('view-' + nome);
       var aba = document.getElementById('tab-' + nome);
       painel.hidden = nome !== v;
@@ -1341,8 +1687,9 @@ footer b{color:var(--ink-2);font-weight:500}
     renderMapa();
     renderEditor();
     renderPlacar();
+    renderTrocas();
     renderDados();
-    mostrarVista(estado.vista === 'dados' ? 'dados' : 'territorios');
+    mostrarVista(VISTAS.indexOf(estado.vista) >= 0 ? estado.vista : 'territorios');
   }
 
   document.querySelectorAll('.switch button').forEach(function(b){
